@@ -13,11 +13,11 @@
 
 static void example_matter_light_task(void *pvParameters)
 {
+    // TODO: error checking
+    // TODO: set default led values
     while(!(wifi_is_up(RTW_STA_INTERFACE) || wifi_is_up(RTW_AP_INTERFACE))) {
-        vTaskDelay(500);
+        //waiting for Wifi to be initialized
     }
-
-    ChipLogProgress(DeviceLayer, "Lighting example!\n");
 
     CHIP_ERROR err = CHIP_NO_ERROR;
 
@@ -25,27 +25,27 @@ static void example_matter_light_task(void *pvParameters)
     //
     err = matter_core_start();
     if (err != CHIP_NO_ERROR)
-        ChipLogProgress(DeviceLayer, "matter_core_start failed!\n");
+        printf("matter_core_start failed!\n");
 
     err = matter_driver_led_init();
     if (err != CHIP_NO_ERROR)
-        ChipLogProgress(DeviceLayer, "matter_driver_led_init failed!\n");
+        printf("matter_driver_led_init failed!\n");
 
     err = matter_driver_led_set_startup_value();
     if (err != CHIP_NO_ERROR)
-        ChipLogProgress(DeviceLayer, "matter_driver_led_set_startup_value failed!\n");
+        printf("matter_driver_led_set_startup_value failed!\n");
 
     err = matter_driver_button_init();
     if (err != CHIP_NO_ERROR)
-        ChipLogProgress(DeviceLayer, "matter_driver_button_init failed!\n");
+        printf("matter_driver_button_init failed!\n");
 
     err = matter_interaction_start_downlink();
     if (err != CHIP_NO_ERROR)
-        ChipLogProgress(DeviceLayer, "matter_interaction_start_downlink failed!\n");
+        printf("matter_interaction_start_downlink failed!\n");
 
     err = matter_interaction_start_uplink();
     if (err != CHIP_NO_ERROR)
-        ChipLogProgress(DeviceLayer, "matter_interaction_start_uplink failed!\n");
+        printf("matter_interaction_start_uplink failed!\n");
 
     while(1);
 }
@@ -53,5 +53,5 @@ static void example_matter_light_task(void *pvParameters)
 extern "C" void example_matter_light(void)
 {
     if(xTaskCreate(example_matter_light_task, ((const char*)"example_matter_task_thread"), 2048, NULL, tskIDLE_PRIORITY + 1, NULL) != pdPASS)
-        ChipLogProgress(DeviceLayer, "\n\r%s xTaskCreate(example_matter_light) failed", __FUNCTION__);
+        printf("\n\r%s xTaskCreate(example_matter_light) failed", __FUNCTION__);
 }
