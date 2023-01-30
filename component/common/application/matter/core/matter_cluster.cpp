@@ -45,7 +45,7 @@ void plugin_init_callback_common()
     }
 }
 
-Cluster::Cluster(config_t config, uint32_t _cluster_id, uint32_t _endpoint_id, uint16_t cluster_flags)
+Cluster::Cluster(config_t config, uint32_t _cluster_id, uint16_t _endpoint_id, uint16_t cluster_flags)
 {
     flags = cluster_flags;
     endpoint_id = _endpoint_id;

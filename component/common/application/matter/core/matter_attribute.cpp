@@ -585,15 +585,16 @@ static EmberAfDefaultAttributeValue get_default_value_from_data(ameba_matter_att
     return default_value;
 }
 
-Attribute::Attribute(ameba_matter_attr_val_t attribute_value, uint32_t _attribute_id, uint32_t _cluster_id, uint32_t _endpoint_id, uint16_t attribute_flags)
+Attribute::Attribute(ameba_matter_attr_val_t attribute_value, uint32_t _attribute_id, uint32_t _cluster_id, uint16_t _endpoint_id, uint16_t attribute_flags)
 {
-    // TODO: add bounds, kvs
     val = attribute_value;
     endpoint_id = _endpoint_id;
     cluster_id = _cluster_id;
     attribute_id = _attribute_id;
     flags = attribute_flags | ATTRIBUTE_FLAG_EXTERNAL_STORAGE;
     int8_t err;
+    default_value = (EmberAfDefaultOrMinMaxAttributeValue *) pvPortMalloc(sizeof(EmberAfDefaultOrMinMaxAttributeValue));
+    bounds = (ameba_matter_attr_bounds_t *) pvPortMalloc(sizeof(ameba_matter_attr_bounds_t));
 
     /* store non-volatile attributes in kvs */
     if (flags & ATTRIBUTE_FLAG_NONVOLATILE)
@@ -683,17 +684,22 @@ int8_t Attribute::set_bounds(ameba_matter_attr_val_t min, ameba_matter_attr_val_
     // Check if bounds can be set 
     if (val.type == AMEBA_MATTER_VAL_TYPE_CHAR_STRING ||
         val.type == AMEBA_MATTER_VAL_TYPE_OCTET_STRING ||
-        val.type == AMEBA_MATTER_VAL_TYPE_ARRAY) {
+        val.type == AMEBA_MATTER_VAL_TYPE_ARRAY)
+    {
         printf("Bounds cannot be set for string/array type attributes\n");
         return -1;
     }
-    if ((val.type != min.type) || (val.type != max.type)) {
+    if ((val.type != min.type) || (val.type != max.type)) 
+    {
         printf("Cannot set bounds because of val type mismatch: expected: %d, min: %d, max: %d\n",
                  val.type, min.type, max.type);
         return -1;
     }
 
+    free_default_value();
+
     // set bounds
+    memset(bounds, 0, sizeof(ameba_matter_attr_bounds_t));
     memcpy((void*)&bounds->min, (void*)&min, sizeof(ameba_matter_attr_val_t));
     memcpy((void*)&bounds->max, (void*)&max, sizeof(ameba_matter_attr_val_t));
     flags |= ATTRIBUTE_FLAG_MIN_MAX;
@@ -722,23 +728,23 @@ int8_t Attribute::free_default_value()
     if (flags & ATTRIBUTE_FLAG_MIN_MAX) 
     {
         if (default_value_size > 2) {
-            if (default_value.ptrToMinMaxValue->defaultValue.ptrToDefaultValue) {
-                vPortFree((void *)default_value.ptrToMinMaxValue->defaultValue.ptrToDefaultValue);
+            if (default_value->ptrToMinMaxValue->defaultValue.ptrToDefaultValue) {
+                vPortFree((void *)default_value->ptrToMinMaxValue->defaultValue.ptrToDefaultValue);
             }
-            if (default_value.ptrToMinMaxValue->minValue.ptrToDefaultValue) {
-                vPortFree((void *)default_value.ptrToMinMaxValue->minValue.ptrToDefaultValue);
+            if (default_value->ptrToMinMaxValue->minValue.ptrToDefaultValue) {
+                vPortFree((void *)default_value->ptrToMinMaxValue->minValue.ptrToDefaultValue);
             }
-            if (default_value.ptrToMinMaxValue->maxValue.ptrToDefaultValue) {
-                vPortFree((void *)default_value.ptrToMinMaxValue->maxValue.ptrToDefaultValue);
+            if (default_value->ptrToMinMaxValue->maxValue.ptrToDefaultValue) {
+                vPortFree((void *)default_value->ptrToMinMaxValue->maxValue.ptrToDefaultValue);
             }
         }
-        vPortFree((void *)default_value.ptrToMinMaxValue);
+        vPortFree((void *)default_value->ptrToMinMaxValue);
     }
     else if (default_value_size > 2)
     {
-        if (default_value.ptrToDefaultValue)
+        if (default_value->ptrToDefaultValue)
         {
-            vPortFree((void *)default_value.ptrToDefaultValue);
+            vPortFree((void *)default_value->ptrToDefaultValue);
         }
     }
     return 0;
@@ -752,10 +758,12 @@ int8_t Attribute::set_default_value_from_current_val()
     get_data_from_attr_val(&val, &attribute_type, &attribute_size, NULL);
 
     /* Get and set value */
-    if (flags & ATTRIBUTE_FLAG_MIN_MAX) {
+    if (flags & ATTRIBUTE_FLAG_MIN_MAX)
+    {
         EmberAfAttributeMinMaxValue *temp_value = (EmberAfAttributeMinMaxValue *)pvPortCalloc(1,
                                                                                 sizeof(EmberAfAttributeMinMaxValue));
-        if (!temp_value) {
+        if (!temp_value) 
+        {
             printf("Could not allocate ptrToMinMaxValue for default value\n");
             return -1;
         }
@@ -764,13 +772,15 @@ int8_t Attribute::set_default_value_from_current_val()
                                                            attribute_size);
         temp_value->maxValue = get_default_value_from_data(&bounds->max, attribute_type,
                                                            attribute_size);
-        default_value.ptrToMinMaxValue = temp_value;
+        default_value->ptrToMinMaxValue = temp_value;
     } else if (attribute_size > 2) {
         EmberAfDefaultAttributeValue temp_value = get_default_value_from_data(&val, attribute_type, attribute_size);
-        default_value.ptrToDefaultValue = temp_value.ptrToDefaultValue;
-    } else {
+        default_value->ptrToDefaultValue = temp_value.ptrToDefaultValue;
+    }
+    else
+    {
         EmberAfDefaultAttributeValue temp_value = get_default_value_from_data(&val, attribute_type, attribute_size);
-        default_value.defaultValue = temp_value.defaultValue;
+        default_value->defaultValue = temp_value.defaultValue;
     }
     default_value_size = attribute_size;
     return 0;
