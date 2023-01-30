@@ -70,6 +70,7 @@ Cluster::Cluster(config_t config, uint32_t _cluster_id, uint32_t _endpoint_id, u
         Attribute *cluster_revision = new Attribute(ameba_matter_uint16(identify_config.cluster_revision), Globals::Attributes::ClusterRevision::Id, cluster_id, endpoint_id, ATTRIBUTE_FLAG_NONE);
         add_attribute(cluster_revision);
         Attribute *identify_time = new Attribute(ameba_matter_uint16(identify_config.identify_time), Identify::Attributes::IdentifyTime::Id, cluster_id, endpoint_id, ATTRIBUTE_FLAG_WRITABLE);
+        identify_time->set_bounds(ameba_matter_uint16(0x0), ameba_matter_uint16(0xFE));
         add_attribute(identify_time);
         Attribute *identify_type = new Attribute(ameba_matter_uint8(identify_config.identify_type), Identify::Attributes::IdentifyType::Id, cluster_id, endpoint_id, ATTRIBUTE_FLAG_NONE);
         add_attribute(identify_type);
@@ -242,6 +243,7 @@ Cluster::Cluster(config_t config, uint32_t _cluster_id, uint32_t _endpoint_id, u
         Attribute *on_level = new Attribute(ameba_matter_nullable_uint8(level_control_config.on_level), LevelControl::Attributes::OnLevel::Id, cluster_id, endpoint_id, ATTRIBUTE_FLAG_WRITABLE | ATTRIBUTE_FLAG_NULLABLE);
         add_attribute(on_level);
         Attribute *options = new Attribute(ameba_matter_uint8(level_control_config.options), LevelControl::Attributes::Options::Id, cluster_id, endpoint_id, ATTRIBUTE_FLAG_WRITABLE);
+        options->set_bounds(ameba_matter_bitmap8(0x0), ameba_matter_bitmap8(0x3));
         add_attribute(options);
 
         Command *move_to_level = new Command(LevelControl::Commands::MoveToLevel::Id, cluster_id, endpoint_id, COMMAND_FLAG_ACCEPTED, ameba_matter_command_callback_move_to_level);

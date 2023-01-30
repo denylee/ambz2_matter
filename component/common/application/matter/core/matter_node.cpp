@@ -4,7 +4,7 @@
 
 void Node::add_endpoint(Endpoint *endpoint)
 {
-    endpoint->endpoint_id = min_unused_endpoint_id++;
+    // endpoint->endpoint_id = min_unused_endpoint_id++;
     Endpoint *previous_endpoint = NULL;
     Endpoint *current_endpoint = endpoint_list;
     while (current_endpoint)

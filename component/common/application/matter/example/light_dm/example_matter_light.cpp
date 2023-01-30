@@ -65,7 +65,11 @@ static void example_matter_light_task(void *pvParameters)
 
     // CHIP_ERROR err = CHIP_NO_ERROR;
 
+    // wrap this
     initPref();     // init NVS
+    registerPref();
+    registerPref2();
+
     // //
     // err = matter_core_start();
     // if (err != CHIP_NO_ERROR)

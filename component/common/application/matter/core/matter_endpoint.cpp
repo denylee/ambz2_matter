@@ -1,10 +1,17 @@
 #include "matter_endpoint.h"
 #include "matter_flags.h"
+#include "matter_node.h"
 
 using namespace chip::app::Clusters;
 
+extern Node node;
+
 Endpoint::Endpoint(config_t config, uint16_t endpoint_flags)
 {
+    // FIXME: this is not the best way to assign endpoint, 
+    // if this particular endpoint is not added to the node, then the min_unused_endpoint_id should not be incremented
+    endpoint_id = node.min_unused_endpoint_id++;
+
     flags = endpoint_flags;
 
     if (config.identify.enabled)

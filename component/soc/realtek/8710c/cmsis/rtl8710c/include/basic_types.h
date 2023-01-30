@@ -546,6 +546,7 @@ typedef unsigned char	BOOLEAN,*PBOOLEAN;
 
 extern size_t strnlen(const char *s, size_t count);
 extern void *pvPortMalloc( size_t xWantedSize );
+extern void *pvPortCalloc(size_t xWantedCnt, size_t xWantedSize);
 
 //def
 #ifndef false
