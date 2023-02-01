@@ -11,8 +11,8 @@ Endpoint::Endpoint(config_t config, uint16_t endpoint_flags)
     // FIXME: this is not the best way to assign endpoint, 
     // if this particular endpoint is not added to the node, then the min_unused_endpoint_id should not be incremented
     endpoint_id = node.min_unused_endpoint_id++;
-
     flags = endpoint_flags;
+    parent_endpoint_id = chip::kInvalidEndpointId;
 
     if (config.identify.enabled)
     {
@@ -139,5 +139,17 @@ int8_t Endpoint::add_device_type(uint32_t device_type_id, uint8_t device_type_ve
     device_type_ids[device_type_count] = device_type_id;
     device_type_versions[device_type_count] = device_type_version;
     device_type_count++;
+    return 0;
+}
+
+int8_t Endpoint::set_parent_endpoint(Endpoint *endpoint, Endpoint *parent_endpoint)
+{
+    if (!endpoint || !parent_endpoint) {
+        printf("Endpoint or parent_endpoint cannot be NULL\n");
+        return -1;
+    }
+    Endpoint *current_endpoint = (Endpoint *)endpoint;
+    Endpoint *current_parent_endpoint = (Endpoint *)parent_endpoint;
+    current_endpoint->parent_endpoint_id = current_parent_endpoint->endpoint_id;
     return 0;
 }

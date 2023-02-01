@@ -18,7 +18,10 @@
 //     Cluster *cluster_list;
 // };
 
+using chip::DataVersion;
+
 #define AMEBA_MATTER_MAX_DEVICE_TYPE_COUNT  16
+
 class Endpoint
 {
 public:
@@ -29,12 +32,17 @@ public:
     Cluster *get_cluster_by_id(uint32_t cluster_id);
     void add_cluster(Cluster *cluster);
     int8_t add_device_type(uint32_t device_type_id, uint8_t device_type_version);
+    int8_t set_parent_endpoint(Endpoint *endpoint, Endpoint *parent_endpoint);
     uint16_t endpoint_id;
     uint8_t device_type_count = 0;
-    uint32_t device_type_ids[16];
-    uint32_t device_type_versions[16];
+    uint32_t device_type_ids[AMEBA_MATTER_MAX_DEVICE_TYPE_COUNT];
+    uint32_t device_type_versions[AMEBA_MATTER_MAX_DEVICE_TYPE_COUNT];
     uint16_t flags;
     Cluster *cluster_list = NULL;
+    EmberAfEndpointType *endpoint_type;
+    DataVersion *data_versions_ptr;
+    EmberAfDeviceType *device_types_ptr;
+    uint16_t parent_endpoint_id;
 
 protected:
     Endpoint *next = NULL;

@@ -7,6 +7,8 @@
 
 typedef void (*plugin_server_init_callback_t)();
 typedef void (*plugin_client_init_callback_t)();
+typedef void (*function_t)();
+
 void plugin_init_callback_common(void);
 
 class Cluster
@@ -20,6 +22,7 @@ public:
     Command *get_command_by_id(uint32_t command_id, uint16_t command_flags);
     void add_attribute(Attribute *attribute);
     void add_command(Command *command);
+    int8_t add_function_list(function_t *_function_list, int function_flags);
     uint16_t endpoint_id;
     uint32_t cluster_id;
     Cluster *next = NULL;
@@ -33,4 +36,5 @@ public:
     plugin_client_init_callback_t get_plugin_client_init_callback(void);
     plugin_server_init_callback_t plugin_server_init_callback;
     plugin_client_init_callback_t plugin_client_init_callback;
+    function_t *function_list = NULL;
 };

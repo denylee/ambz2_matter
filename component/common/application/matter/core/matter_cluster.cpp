@@ -51,13 +51,20 @@ Cluster::Cluster(config_t config, uint32_t _cluster_id, uint16_t _endpoint_id, u
     endpoint_id = _endpoint_id;
     cluster_id = _cluster_id;
 
-    // TODO: Some clusters have features, eg, onoff has lighting features
-    // check if cluster == cluster_id, if feature available, add feature attributes
+    // TODO: don't hardcode array size
+    function_t _function_list[2] = { 0 };
+    uint16_t function_flags;
+
+    // TODO: create binding cluster for clients
     if (_cluster_id == Identify::Id)
     {
         if (flags & CLUSTER_FLAG_SERVER)
         {
             set_plugin_server_init_callback(MatterIdentifyPluginServerInitCallback);
+            _function_list[0] = (function_t)emberAfIdentifyClusterServerInitCallback;
+            _function_list[1] = (function_t)MatterIdentifyClusterServerAttributeChangedCallback;
+            function_flags = CLUSTER_FLAG_INIT_FUNCTION | CLUSTER_FLAG_ATTRIBUTE_CHANGED_FUNCTION;
+            add_function_list(_function_list, function_flags);
         }
         if (flags & CLUSTER_FLAG_CLIENT)
         {
@@ -84,6 +91,9 @@ Cluster::Cluster(config_t config, uint32_t _cluster_id, uint16_t _endpoint_id, u
         if (flags & CLUSTER_FLAG_SERVER)
         {
             set_plugin_server_init_callback(MatterGroupsPluginServerInitCallback);
+            _function_list[0] = (function_t)emberAfGroupsClusterServerInitCallback;
+            function_flags = CLUSTER_FLAG_INIT_FUNCTION;
+            add_function_list(_function_list, function_flags);
         }
         if (flags & CLUSTER_FLAG_CLIENT)
         {
@@ -125,6 +135,9 @@ Cluster::Cluster(config_t config, uint32_t _cluster_id, uint16_t _endpoint_id, u
         if (flags & CLUSTER_FLAG_SERVER)
         {
             set_plugin_server_init_callback(MatterScenesPluginServerInitCallback);
+            _function_list[0] = (function_t)emberAfScenesClusterServerInitCallback;
+            function_flags = CLUSTER_FLAG_INIT_FUNCTION;
+            add_function_list(_function_list, function_flags);
         }
         if (flags & CLUSTER_FLAG_CLIENT)
         {
@@ -180,6 +193,9 @@ Cluster::Cluster(config_t config, uint32_t _cluster_id, uint16_t _endpoint_id, u
         if (flags & CLUSTER_FLAG_SERVER)
         {
             set_plugin_server_init_callback(MatterOnOffPluginServerInitCallback);
+            _function_list[0] = (function_t)emberAfOnOffClusterServerInitCallback;
+            function_flags = CLUSTER_FLAG_INIT_FUNCTION;
+            add_function_list(_function_list, function_flags);
         }
         if (flags & CLUSTER_FLAG_CLIENT)
         {
@@ -227,6 +243,9 @@ Cluster::Cluster(config_t config, uint32_t _cluster_id, uint16_t _endpoint_id, u
         if (flags & CLUSTER_FLAG_SERVER)
         {
             set_plugin_server_init_callback(MatterLevelControlPluginServerInitCallback);
+            _function_list[0] = (function_t)emberAfLevelControlClusterServerInitCallback;
+            function_flags = CLUSTER_FLAG_INIT_FUNCTION;
+            add_function_list(_function_list, function_flags);
         }
         if (flags & CLUSTER_FLAG_CLIENT)
         {
@@ -285,6 +304,9 @@ Cluster::Cluster(config_t config, uint32_t _cluster_id, uint16_t _endpoint_id, u
         if (flags & CLUSTER_FLAG_SERVER)
         {
             set_plugin_server_init_callback(MatterBasicInformationPluginServerInitCallback);
+            _function_list[0] = (function_t)emberAfBasicInformationClusterServerInitCallback;
+            function_flags = CLUSTER_FLAG_INIT_FUNCTION;
+            add_function_list(_function_list, function_flags);
         }
         if (flags & CLUSTER_FLAG_CLIENT)
         {
@@ -305,6 +327,8 @@ Cluster::Cluster(config_t config, uint32_t _cluster_id, uint16_t _endpoint_id, u
         if (flags & CLUSTER_FLAG_SERVER)
         {
             set_plugin_server_init_callback(MatterGeneralCommissioningPluginServerInitCallback);
+            function_flags = CLUSTER_FLAG_NONE;
+            add_function_list(_function_list, function_flags);
         }
         if (flags & CLUSTER_FLAG_CLIENT)
         {
@@ -338,6 +362,8 @@ Cluster::Cluster(config_t config, uint32_t _cluster_id, uint16_t _endpoint_id, u
         if (flags & CLUSTER_FLAG_SERVER)
         {
             set_plugin_server_init_callback(MatterNetworkCommissioningPluginServerInitCallback);
+            function_flags = CLUSTER_FLAG_NONE;
+            add_function_list(_function_list, function_flags);
         }
         if (flags & CLUSTER_FLAG_CLIENT)
         {
@@ -375,6 +401,8 @@ Cluster::Cluster(config_t config, uint32_t _cluster_id, uint16_t _endpoint_id, u
         if (flags & CLUSTER_FLAG_SERVER)
         {
             set_plugin_server_init_callback(MatterGeneralDiagnosticsPluginServerInitCallback);
+            function_flags = CLUSTER_FLAG_NONE;
+            add_function_list(_function_list, function_flags);
         }
         if (flags & CLUSTER_FLAG_CLIENT)
         {
@@ -397,6 +425,8 @@ Cluster::Cluster(config_t config, uint32_t _cluster_id, uint16_t _endpoint_id, u
         if (flags & CLUSTER_FLAG_SERVER)
         {
             set_plugin_server_init_callback(MatterThreadNetworkDiagnosticsPluginServerInitCallback);
+            function_flags = CLUSTER_FLAG_NONE;
+            add_function_list(_function_list, function_flags);
         }
         if (flags & CLUSTER_FLAG_CLIENT)
         {
@@ -417,6 +447,8 @@ Cluster::Cluster(config_t config, uint32_t _cluster_id, uint16_t _endpoint_id, u
         if (flags & CLUSTER_FLAG_SERVER)
         {
             set_plugin_server_init_callback(MatterWiFiNetworkDiagnosticsPluginServerInitCallback);
+            function_flags = CLUSTER_FLAG_NONE;
+            add_function_list(_function_list, function_flags);
         }
         if (flags & CLUSTER_FLAG_CLIENT)
         {
@@ -436,6 +468,8 @@ Cluster::Cluster(config_t config, uint32_t _cluster_id, uint16_t _endpoint_id, u
         if (flags & CLUSTER_FLAG_SERVER)
         {
             set_plugin_server_init_callback(MatterAdministratorCommissioningPluginServerInitCallback);
+            function_flags = CLUSTER_FLAG_NONE;
+            add_function_list(_function_list, function_flags);
         }
         if (flags & CLUSTER_FLAG_CLIENT)
         {
@@ -461,6 +495,8 @@ Cluster::Cluster(config_t config, uint32_t _cluster_id, uint16_t _endpoint_id, u
         if (flags & CLUSTER_FLAG_SERVER)
         {
             set_plugin_server_init_callback(MatterOperationalCredentialsPluginServerInitCallback);
+            function_flags = CLUSTER_FLAG_NONE;
+            add_function_list(_function_list, function_flags);
         }
         if (flags & CLUSTER_FLAG_CLIENT)
         {
@@ -574,6 +610,13 @@ void Cluster::add_command(Command *command)
     {
         previous_command->set_next(command);
     }
+}
+
+int8_t Cluster::add_function_list(function_t *_function_list, int function_flags)
+{
+    function_list = _function_list;
+    flags |= function_flags;
+    return 0;
 }
 
 void Cluster::set_plugin_server_init_callback(plugin_server_init_callback_t callback)
