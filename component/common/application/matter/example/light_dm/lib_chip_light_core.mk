@@ -249,6 +249,7 @@ GENERATE_NINJA:
 	cd $(CHIPDIR)/config/ameba/components/chip && gn gen --check --fail-on-unused-args $(CHIPDIR)/examples/lighting-app/ameba/build/chip
 	cd $(CHIPDIR)/config/ameba/components/chip ; ninja -C $(CHIPDIR)/examples/lighting-app/ameba/build/chip :ameba
 	cp -f $(OUTPUT_DIR)/lib/* $(SDKROOTDIR)/component/soc/realtek/8710c/misc/bsp/lib/common/GCC
+
 #*****************************************************************************#
 #              CLEAN GENERATED FILES                                          #
 #*****************************************************************************#

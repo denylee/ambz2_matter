@@ -1,11 +1,16 @@
 #include "matter_command.h"
 #include "matter_flags.h"
 #include "matter_node.h"
-#include <app/util/ember-compatibility-functions.h>
+// #include <app/util/ember-compatibility-functions.h>
+
+using chip::Protocols::InteractionModel::Status;
 
 extern Node *node;
 
-void DispatchSingleClusterCommandCommon(const ConcreteCommandPath &command_path, TLVReader &tlv_data, void *opaque_ptr)
+namespace chip {
+namespace app {
+
+void DispatchSingleClusterCommandCommon(const ConcreteCommandPath &command_path, TLVReader &tlv_data, CommandHandler *command_obj)
 {
     uint16_t endpoint_id = command_path.mEndpointId;
     uint32_t cluster_id = command_path.mClusterId;
@@ -24,27 +29,20 @@ void DispatchSingleClusterCommandCommon(const ConcreteCommandPath &command_path,
     callback_t callback = command->callback; // TODO: use getter
     if(callback)
     {
-        err = callback(command_path, tlv_data, opaque_ptr);
+        err = callback(command_path, tlv_data, (void*) command_obj);
     }
     int flags = command->flags; // TODO: use getter
     if (flags & COMMAND_FLAG_CUSTOM)
     {
-        EmberAfStatus status = (err == 0) ? EMBER_ZCL_STATUS_SUCCESS : EMBER_ZCL_STATUS_FAILURE;
-        emberAfSendImmediateDefaultResponse(status);
+        Status status = (err == 0) ? Status::Success : Status::Failure;
+        command_obj->AddStatus(command_path, status);
     }
 }
-
-namespace chip {
-namespace app {
 
 void DispatchSingleClusterCommand(const ConcreteCommandPath &command_path, TLVReader &tlv_data,
                                   CommandHandler *command_obj)
 {
-    Compatibility::SetupEmberAfCommandHandler(command_obj, command_path);
-
     DispatchSingleClusterCommandCommon(command_path, tlv_data, command_obj);
-
-    Compatibility::ResetEmberAfObjects();
 }
 
 } /* namespace app */

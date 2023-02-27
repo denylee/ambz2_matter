@@ -620,7 +620,7 @@ Attribute::Attribute(ameba_matter_attr_val_t attribute_value, uint32_t _attribut
         {
             // else (not found), set the attribute_value to the value passed in, then store in kvs
             // TODO: only enter here if error is "not found"
-            memcpy(&val, &attribute_value, sizeof(ameba_matter_attr_val_t));
+            // memcpy(&val, &attribute_value, sizeof(ameba_matter_attr_val_t));
             set_nvs(key, &val);
         }
         vPortFree(ptemp_val);
@@ -628,7 +628,7 @@ Attribute::Attribute(ameba_matter_attr_val_t attribute_value, uint32_t _attribut
     else
     {
         // set the attribute_value to the value passed in, don't need to store in kvs
-        memcpy(&val, &attribute_value, sizeof(ameba_matter_attr_val_t));
+        // memcpy(&val, &attribute_value, sizeof(ameba_matter_attr_val_t));
     }
 
     set_default_value_from_current_val();

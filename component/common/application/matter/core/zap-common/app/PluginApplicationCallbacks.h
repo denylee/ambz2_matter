@@ -19,6 +19,7 @@
 
 #pragma once
 
+// do we need this? try remove
 void __attribute__((weak)) MatterIdentifyPluginClientInitCallback() {}
 void MatterIdentifyPluginServerInitCallback();
 void __attribute__((weak)) MatterGroupsPluginClientInitCallback() {}

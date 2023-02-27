@@ -70,33 +70,6 @@ static void example_matter_light_task(void *pvParameters)
     registerPref();
     registerPref2();
 
-    // //
-    // err = matter_core_start();
-    // if (err != CHIP_NO_ERROR)
-    //     printf("matter_core_start failed!\n");
-
-    // err = matter_driver_led_init();
-    // if (err != CHIP_NO_ERROR)
-    //     printf("matter_driver_led_init failed!\n");
-
-    // err = matter_driver_led_set_startup_value();
-    // if (err != CHIP_NO_ERROR)
-    //     printf("matter_driver_led_set_startup_value failed!\n");
-
-    // err = matter_driver_button_init();
-    // if (err != CHIP_NO_ERROR)
-    //     printf("matter_driver_button_init failed!\n");
-
-    // err = matter_interaction_start_downlink();
-    // if (err != CHIP_NO_ERROR)
-    //     printf("matter_interaction_start_downlink failed!\n");
-
-    // err = matter_interaction_start_uplink();
-    // if (err != CHIP_NO_ERROR)
-    //     printf("matter_interaction_start_uplink failed!\n");
-
-    // while(1);
-
     /* Node creation */
     node = new Node;
 
