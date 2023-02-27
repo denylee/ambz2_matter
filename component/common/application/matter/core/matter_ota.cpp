@@ -16,6 +16,18 @@ BDXDownloader gDownloader;
 AmebaOTAImageProcessor gImageProcessor;
 } // namespace
 
+extern "C" void amebaQueryImageCmdHandler()
+{
+    ChipLogProgress(DeviceLayer, "Calling amebaQueryImageCmdHandler");
+    PlatformMgr().ScheduleWork([](intptr_t) { GetRequestorInstance()->TriggerImmediateQuery(); });
+}
+
+extern "C" void amebaApplyUpdateCmdHandler()
+{
+    ChipLogProgress(DeviceLayer, "Calling amebaApplyUpdateCmdHandler");
+    PlatformMgr().ScheduleWork([](intptr_t) { GetRequestorInstance()->ApplyUpdate(); });
+}
+
 void matter_ota_init()
 {
     SetRequestorInstance(&gRequestorCore);
