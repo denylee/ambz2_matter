@@ -16,43 +16,6 @@
 
 Node *node;
 
-// move this to matter_config
-void configure_endpoint_config(uint16_t device_type, config_t *config)
-{
-    switch (device_type)
-    {
-    case AMEBA_MATTER_ROOT_NODE_DEVICE_TYPE_ID:
-        config->basic_information.enabled = true;
-        config->general_commissioning.enabled = true;
-        config->network_commissioning.enabled = true;
-        config->general_diagnostics.enabled = true;
-        config->administrator_commissioning.enabled = true;
-        config->operational_credentials.enabled = true;
-#if 0 // thread enabled
-        config->diagnostics_network_thread.enabled = true;
-#endif
-#if 1 // wifi enabled
-        config->diagnostics_network_wifi.enabled = true;
-#endif
-        break;
-
-    case AMEBA_MATTER_ON_OFF_LIGHT_DEVICE_TYPE_ID:
-        config->identify.enabled = true;
-        config->groups.enabled = true;
-        config->scenes.enabled = true;
-        config->on_off.enabled = true;
-        break;
-
-    case AMEBA_MATTER_DIMMABLE_LIGHT_DEVICE_TYPE_ID:
-        config->identify.enabled = true;
-        config->groups.enabled = true;
-        config->scenes.enabled = true;
-        config->on_off.enabled = true;
-        config->level_control.enabled = true;
-        break;
-    }
-}
-
 static void example_matter_light_task(void *pvParameters)
 {
     // // TODO: error checking
@@ -67,8 +30,8 @@ static void example_matter_light_task(void *pvParameters)
 
     // wrap this
     initPref();     // init NVS
-    registerPref();
-    registerPref2();
+    // registerPref();
+    // registerPref2();
 
     /* Node creation */
     node = new Node;
@@ -77,29 +40,30 @@ static void example_matter_light_task(void *pvParameters)
     config_t root_node_config;
     configure_endpoint_config(AMEBA_MATTER_ROOT_NODE_DEVICE_TYPE_ID, &root_node_config);
     Endpoint *root_node = new Endpoint(root_node_config, ENDPOINT_FLAG_NONE);
-    if (root_node->add_device_type(AMEBA_MATTER_ROOT_NODE_DEVICE_TYPE_ID, AMEBA_MATTER_ROOT_NODE_DEVICE_TYPE_VERSION) == 0)
-    {
-        printf("Successfully added add device type: %d\n", AMEBA_MATTER_ROOT_NODE_DEVICE_TYPE_ID);
-    }
+    // if (root_node->add_device_type(AMEBA_MATTER_ROOT_NODE_DEVICE_TYPE_ID, AMEBA_MATTER_ROOT_NODE_DEVICE_TYPE_VERSION) == 0)
+    // {
+    //     printf("Successfully added add device type: %d\n", AMEBA_MATTER_ROOT_NODE_DEVICE_TYPE_ID);
+    // }
 
     config_t light_config;
     configure_endpoint_config(AMEBA_MATTER_ON_OFF_LIGHT_DEVICE_TYPE_ID, &light_config);
     light_config.on_off.onoff = true;
     Endpoint *on_off_light = new Endpoint(light_config, ENDPOINT_FLAG_NONE);
-    if (on_off_light->add_device_type(AMEBA_MATTER_ON_OFF_LIGHT_DEVICE_TYPE_ID, AMEBA_MATTER_ON_OFF_LIGHT_DEVICE_TYPE_VERSION) == 0)
-    {
-        printf("Successfully added add device type: %d\n", AMEBA_MATTER_ON_OFF_LIGHT_DEVICE_TYPE_ID);
-    }
+    // if (on_off_light->add_device_type(AMEBA_MATTER_ON_OFF_LIGHT_DEVICE_TYPE_ID, AMEBA_MATTER_ON_OFF_LIGHT_DEVICE_TYPE_VERSION) == 0)
+    // {
+    //     printf("Successfully added add device type: %d\n", AMEBA_MATTER_ON_OFF_LIGHT_DEVICE_TYPE_ID);
+    // }
 
     /* Add endpoints */
-    node->add_endpoint(root_node);
-    node->add_endpoint(on_off_light);
+    node->add_endpoint(root_node, AMEBA_MATTER_ROOT_NODE_DEVICE_TYPE_ID, AMEBA_MATTER_ROOT_NODE_DEVICE_TYPE_VERSION);
+    node->add_endpoint(on_off_light, AMEBA_MATTER_ON_OFF_LIGHT_DEVICE_TYPE_ID, AMEBA_MATTER_ON_OFF_LIGHT_DEVICE_TYPE_VERSION);
 
     /* Checks */
     Endpoint *test_endpoint = node->endpoint_list;
     while(test_endpoint)
     {
         printf("Endpoint ID %d clusters:\n", test_endpoint->endpoint_id);
+        printf("Endpoint ID %d has %d clusters:\n", test_endpoint->endpoint_id, test_endpoint->get_cluster_count());
         Cluster *test_cluster = test_endpoint->cluster_list;
         while(test_cluster)
         {
@@ -121,6 +85,37 @@ static void example_matter_light_task(void *pvParameters)
         test_endpoint = test_endpoint->get_next(); 
     }
 
+
+    /* Start Matter Server */
+    ChipLogProgress(DeviceLayer, "Lighting example!\n");
+
+    CHIP_ERROR err = CHIP_NO_ERROR;
+
+    err = matter_core_start();
+    if (err != CHIP_NO_ERROR)
+        ChipLogProgress(DeviceLayer, "matter_core_start failed!\n");
+
+    err = matter_driver_led_init();
+    if (err != CHIP_NO_ERROR)
+        ChipLogProgress(DeviceLayer, "matter_driver_led_init failed!\n");
+
+    err = matter_driver_led_set_startup_value();
+    if (err != CHIP_NO_ERROR)
+        ChipLogProgress(DeviceLayer, "matter_driver_led_set_startup_value failed!\n");
+
+    err = matter_driver_button_init();
+    if (err != CHIP_NO_ERROR)
+        ChipLogProgress(DeviceLayer, "matter_driver_button_init failed!\n");
+
+    err = matter_interaction_start_downlink();
+    if (err != CHIP_NO_ERROR)
+        ChipLogProgress(DeviceLayer, "matter_interaction_start_downlink failed!\n");
+
+    err = matter_interaction_start_uplink();
+    if (err != CHIP_NO_ERROR)
+        ChipLogProgress(DeviceLayer, "matter_interaction_start_uplink failed!\n");
+
+    while(1);
     vTaskDelete(NULL);
 }
 

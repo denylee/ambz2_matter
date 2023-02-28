@@ -409,3 +409,39 @@ ameba_matter_attr_val_t ameba_matter_array(uint8_t *val, uint16_t data_size, uin
     };
     return attr_val;
 }
+
+void configure_endpoint_config(uint16_t device_type, config_t *config)
+{
+    switch (device_type)
+    {
+    case AMEBA_MATTER_ROOT_NODE_DEVICE_TYPE_ID:
+        config->basic_information.enabled = true;
+        config->general_commissioning.enabled = true;
+        config->network_commissioning.enabled = true;
+        config->general_diagnostics.enabled = true;
+        config->administrator_commissioning.enabled = true;
+        config->operational_credentials.enabled = true;
+#if 0 // thread enabled
+        config->diagnostics_network_thread.enabled = true;
+#endif
+#if 1 // wifi enabled
+        config->diagnostics_network_wifi.enabled = true;
+#endif
+        break;
+
+    case AMEBA_MATTER_ON_OFF_LIGHT_DEVICE_TYPE_ID:
+        config->identify.enabled = true;
+        config->groups.enabled = true;
+        config->scenes.enabled = true;
+        config->on_off.enabled = true;
+        break;
+
+    case AMEBA_MATTER_DIMMABLE_LIGHT_DEVICE_TYPE_ID:
+        config->identify.enabled = true;
+        config->groups.enabled = true;
+        config->scenes.enabled = true;
+        config->on_off.enabled = true;
+        config->level_control.enabled = true;
+        break;
+    }
+}

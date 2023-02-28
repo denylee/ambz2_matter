@@ -257,6 +257,7 @@ SRC_CPP += $(CHIPDIR)/src/app/clusters/occupancy-sensor-server/occupancy-sensor-
 SRC_CPP += $(CHIPDIR)/src/app/clusters/on-off-server/on-off-server.cpp
 SRC_CPP += $(CHIPDIR)/src/app/clusters/operational-credentials-server/operational-credentials-server.cpp
 SRC_CPP += $(CHIPDIR)/src/app/clusters/ota-provider/ota-provider.cpp
+SRC_CPP += $(CHIPDIR)/src/app/clusters/ota-requestor/BDXDownloader.cpp
 SRC_CPP += $(CHIPDIR)/src/app/clusters/ota-requestor/DefaultOTARequestor.cpp
 SRC_CPP += $(CHIPDIR)/src/app/clusters/ota-requestor/DefaultOTARequestorDriver.cpp
 SRC_CPP += $(CHIPDIR)/src/app/clusters/ota-requestor/DefaultOTARequestorStorage.cpp

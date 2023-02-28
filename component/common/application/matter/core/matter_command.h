@@ -11,7 +11,6 @@ typedef int8_t (*callback_t)(const ConcreteCommandPath &command_path, TLVReader 
 class Command
 {
 public:
-    // TODO: add callback
     Command(uint32_t _command_id, uint32_t _cluster_id, uint16_t _endpoint_id, uint16_t command_flags, callback_t command_callback);
     ~ Command();
     uint16_t endpoint_id;
@@ -25,4 +24,3 @@ public:
 
 private:
 };
-

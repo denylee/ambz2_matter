@@ -13,7 +13,7 @@ extern Node *node;
 
 void plugin_init_callback_common()
 {
-    printf("Cluster plugin init common callback\n");
+    ChipLogDetail(DeviceLayer, "Cluster plugin init common callback");
     if (!node) {
         /* Skip plugin_init_callback_common when ameba matter data model is not used */
         return;
@@ -33,7 +33,8 @@ void plugin_init_callback_common()
 
             /* Plugin client init callback */
             plugin_client_init_callback_t plugin_client_init_callback = cluster->get_plugin_client_init_callback();
-            if (plugin_client_init_callback) {
+            if (plugin_client_init_callback) 
+            {
                 plugin_client_init_callback();
             }
 
@@ -572,6 +573,33 @@ Command *Cluster::get_command_by_id(uint32_t command_id, uint16_t command_flags)
         current_command = current_command->get_next();
     }
     return current_command;
+}
+
+uint16_t Cluster::get_attribute_count()
+{
+    uint16_t count = 0;
+    Attribute *current_attribute = attribute_list;
+    while (current_attribute)
+    {
+        current_attribute = current_attribute->get_next();
+        count++;
+    }
+    return count;
+}
+
+uint16_t Cluster::get_command_count(uint16_t command_flags)
+{
+    uint16_t count = 0;
+    Command *current_command = command_list;
+    while (current_command)
+    {
+        if (current_command->flags & command_flags)
+        {
+            count++;
+        }
+        current_command = current_command->get_next();
+    }
+    return count;
 }
 
 void Cluster::add_attribute(Attribute *attribute)

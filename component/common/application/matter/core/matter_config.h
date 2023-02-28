@@ -448,3 +448,6 @@ ameba_matter_attr_val_t ameba_matter_nullable_bitmap32(nullable<uint32_t> val);
 ameba_matter_attr_val_t ameba_matter_char_str(char *val, uint16_t data_size);
 ameba_matter_attr_val_t ameba_matter_octet_str(uint8_t *val, uint16_t data_size);
 ameba_matter_attr_val_t ameba_matter_array(uint8_t *val, uint16_t data_size, uint16_t count);
+
+// Config helper functions
+void configure_endpoint_config(uint16_t device_type, config_t *config);

@@ -30,3 +30,6 @@ public:
     // Callback override_callback;
     Attribute *next = NULL;
 };
+
+int8_t get_data_from_attr_val(ameba_matter_attr_val_t *val, EmberAfAttributeType *attribute_type, uint16_t *attribute_size, uint8_t *value);
+int8_t get_attr_val_from_data(ameba_matter_attr_val_t *val, EmberAfAttributeType attribute_type, uint16_t attribute_size, uint8_t *value, const EmberAfAttributeMetadata * attribute_metadata);

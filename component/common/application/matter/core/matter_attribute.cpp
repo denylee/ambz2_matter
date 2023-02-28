@@ -551,20 +551,20 @@ static EmberAfDefaultAttributeValue get_default_value_from_data(ameba_matter_att
                                                                 EmberAfAttributeType attribute_type,
                                                                 uint16_t attribute_size)
 {
-    EmberAfDefaultAttributeValue default_value = (uint16_t)0;
+    EmberAfDefaultAttributeValue _default_value = (uint16_t)0;
     uint8_t *value = (uint8_t *)pvPortCalloc(1, attribute_size);
 
     if (!value)
     {
         printf("Could not allocate value buffer for default value\n");
-        return default_value;
+        return _default_value;
     }
     get_data_from_attr_val(val, &attribute_type, &attribute_size, value);
 
     if (attribute_size > 2)
     {
         /* Directly set the pointer */
-        default_value = value;
+        _default_value = value;
     }
     else
     {
@@ -579,10 +579,10 @@ static EmberAfDefaultAttributeValue get_default_value_from_data(ameba_matter_att
         {
             int_value = (uint16_t)*value;
         }
-        default_value = int_value;
+        _default_value = int_value;
         vPortFree(value);
     }
-    return default_value;
+    return _default_value;
 }
 
 Attribute::Attribute(ameba_matter_attr_val_t attribute_value, uint32_t _attribute_id, uint32_t _cluster_id, uint16_t _endpoint_id, uint16_t attribute_flags)
@@ -594,7 +594,7 @@ Attribute::Attribute(ameba_matter_attr_val_t attribute_value, uint32_t _attribut
     flags = attribute_flags | ATTRIBUTE_FLAG_EXTERNAL_STORAGE;
     int8_t err;
     default_value = (EmberAfDefaultOrMinMaxAttributeValue *) pvPortMalloc(sizeof(EmberAfDefaultOrMinMaxAttributeValue));
-    bounds = (ameba_matter_attr_bounds_t *) pvPortMalloc(sizeof(ameba_matter_attr_bounds_t));
+    // bounds = (ameba_matter_attr_bounds_t *) pvPortMalloc(sizeof(ameba_matter_attr_bounds_t));
 
     /* store non-volatile attributes in kvs */
     if (flags & ATTRIBUTE_FLAG_NONVOLATILE)
@@ -698,29 +698,24 @@ int8_t Attribute::set_bounds(ameba_matter_attr_val_t min, ameba_matter_attr_val_
 
     free_default_value();
 
+    bounds = (ameba_matter_attr_bounds_t*) pvPortCalloc(1, sizeof(ameba_matter_attr_bounds_t));
+    if (!bounds)
+    {
+        ChipLogError(DeviceLayer, "Could not allocate bounds");
+        return -1;
+    }
+
     // set bounds
     memset(bounds, 0, sizeof(ameba_matter_attr_bounds_t));
     memcpy((void*)&bounds->min, (void*)&min, sizeof(ameba_matter_attr_val_t));
     memcpy((void*)&bounds->max, (void*)&max, sizeof(ameba_matter_attr_val_t));
     flags |= ATTRIBUTE_FLAG_MIN_MAX;
 
+    // set default value again after setting bounds and flags
+    set_default_value_from_current_val();
+
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 int8_t Attribute::free_default_value()
 {

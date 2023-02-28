@@ -3,6 +3,8 @@
 
 #include "matter_core.h"
 #include "matter_ota.h"
+#include "matter_node.h"
+#include "matter_endpoint.h"
 #include <DeviceInfoProviderImpl.h>
 
 #include <app-common/zap-generated/attributes/Accessors.h>
@@ -36,6 +38,8 @@
 
 using namespace ::chip;
 using namespace ::chip::DeviceLayer;
+
+extern Node *node;
 
 app::Clusters::NetworkCommissioning::Instance
     sWiFiNetworkCommissioningInstance(0 /* Endpoint Id */, &(NetworkCommissioning::AmebaWiFiDriver::GetInstance()));
@@ -106,6 +110,14 @@ void matter_core_init_server(intptr_t context)
     gExampleDeviceInfoProvider.SetStorageDelegate(&Server::GetInstance().GetPersistentStorage());
     chip::DeviceLayer::SetDeviceInfoProvider(&gExampleDeviceInfoProvider);
 
+printf("%s, %d\r\n", __FUNCTION__, __LINE__);
+    if (matter_core_enable_all_endpoints() != 0)
+    {
+printf("%s, %d\r\n", __FUNCTION__, __LINE__);
+        ChipLogError(DeviceLayer, "Enable all endpoints failure");
+printf("%s, %d\r\n", __FUNCTION__, __LINE__);
+    }
+
     sWiFiNetworkCommissioningInstance.Init();
 
     // We only have network commissioning on endpoint 0.
@@ -160,3 +172,74 @@ CHIP_ERROR matter_core_start()
     return matter_core_init();
     // matter_core_init_server();
 }
+
+uint16_t matter_core_get_next_endpoint_index()
+{
+    uint16_t endpoint_id = 0;
+    for (uint16_t index=0; index<MAX_ENDPOINT_COUNT; index++)
+    {
+        endpoint_id = emberAfEndpointFromIndex(index);
+        if (endpoint_id == kInvalidEndpointId)
+            return index;
+    }
+    return 0xFFFF;
+}
+
+int32_t matter_core_enable_all_endpoints()
+{
+    if (!node)
+    {
+        ChipLogError(DeviceLayer, "Node not initialized!");
+        // return 0, bypass error for applications who use zap datamodel
+        return 0;
+    }
+
+    Endpoint *current_endpoint = node->endpoint_list;
+    while(current_endpoint)
+    {
+        if (current_endpoint->enable() != 0)
+        {
+            ChipLogError(DeviceLayer, "Failed to enable endpoint %d", current_endpoint->endpoint_id);
+            return -1;
+        }
+        current_endpoint = current_endpoint->get_next();
+    }
+}
+
+namespace lock {
+
+#define DEFAULT_TICKS (500 / portTICK_PERIOD_MS) /* 500 ms in ticks */
+status_t chip_stack_lock(uint32_t ticks_to_wait)
+{
+#if CHIP_STACK_LOCK_TRACKING_ENABLED
+    if (PlatformMgr().IsChipStackLockedByCurrentThread()) {
+        return LOCK_ALREADY_TAKEN;
+    }
+#endif
+    if (ticks_to_wait == portMAX_DELAY) {
+        /* Special handling for max delay */
+        PlatformMgr().LockChipStack();
+        return LOCK_SUCCESS;
+    }
+    uint32_t ticks_remaining = ticks_to_wait;
+    uint32_t ticks = DEFAULT_TICKS;
+    while (ticks_remaining > 0) {
+        if (PlatformMgr().TryLockChipStack()) {
+            return LOCK_SUCCESS;
+        }
+        ticks = ticks_remaining < DEFAULT_TICKS ? ticks_remaining : DEFAULT_TICKS;
+        ticks_remaining -= ticks;
+        ChipLogDetail(DeviceLayer, "Did not get lock yet. Retrying...");
+        vTaskDelay(ticks);
+    }
+    ChipLogError(DeviceLayer, "Could not get lock");
+    return LOCK_FAILED;
+}
+
+int32_t chip_stack_unlock()
+{
+    PlatformMgr().UnlockChipStack();
+    return -1;
+}
+
+} // namespace lock
